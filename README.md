@@ -134,8 +134,8 @@ python train.py -s data/endonerf/pulling --port 6600 --expname endonerf/pulling_
 Relevant configs under `arguments/endonerf/`: `*_graph_match.py` (final model),
 `*_graph_scgs.py` (SC-GS-style baseline), `*_graph_scgs_hybrid.py` (SC-GS-style +
 residual, the isolation ablation), `*_graph_nognn.py` (message-passing removed).
-The two-stage `sbatch` runners are `run_gc_match.bash` (train + render + metrics) and
-friends; SLURM is required (the rasterizer is CUDA).
+Training requires a CUDA GPU (the rasterizer is a CUDA extension); we ran each scene on
+a single H100.
 
 ## 🎇 Rendering & Reconstruction
 ```
@@ -163,9 +163,8 @@ python tools/edit_figure.py --model_path output/endonerf/cutting_match \
     --out output/endonerf/cutting_match/edit_fig_r06
 ```
 Render the edit *during* live 4D playback (scene plays, the edit ramps in, holds, and
-releases) with `tools/make_edit_reveal_seq.py` (see `run_edit_reveal_seq.bash`), and
-build the representative supplementary walkthrough with `tools/make_demo_video.py`
-(see `run_demo_video.bash`).
+releases) with `tools/make_edit_reveal_seq.py`, and build the representative
+supplementary walkthrough with `tools/make_demo_video.py`. Both are GPU scripts.
 
 ## 📖 Documentation
 

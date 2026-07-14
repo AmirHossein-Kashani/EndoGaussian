@@ -18,7 +18,7 @@ the live tree.
 | Python / PyTorch / CUDA | **3.12 · torch 2.5.1 · CUDA 12.1** (12.6 toolchain on the cluster) |
 | GPU | single **NVIDIA H100** (trains in a few minutes per scene) |
 | CUDA submodules | `depth-diff-gaussian-rasterization` (depth-aware fork), `simple-knn` — rebuilt against torch 2.5 |
-| Cluster | Compute Canada SLURM, account `def-ester`, module stack `StdEnv/2023 gcc/12.3 cuda/12.6 python/3.12.4 opencv/4.11.0` |
+| Cluster | SLURM cluster, module stack `StdEnv/2023 gcc/12.3 cuda/12.6 python/3.12.4 opencv/4.11.0` |
 
 Setup is in [CLAUDE.md](../CLAUDE.md) (§ "Environment setup"). The venv lives in `.venv/` (git-ignored);
 login nodes have internet but no GPU, compute nodes have `opencv` (cv2) but no internet.
@@ -304,8 +304,7 @@ Median RPE **3.30 (ours) vs 3.47 (vanilla)** px, 95% CIs [3.14, 3.46] vs [3.34, 
 ### 9.5 Residual isolation — the residual-matched SC-GS ablation (key attribution)
 Which part of the recipe keeps editing reconstruction-neutral? Train SC-GS-style control (`gnn_layers=0`,
 full SE(3), ARAP) **with and without** the per-Gaussian residual ([pulling_graph_scgs.py](../arguments/endonerf/pulling_graph_scgs.py)
-vs [pulling_graph_scgs_hybrid.py](../arguments/endonerf/pulling_graph_scgs_hybrid.py)), 3000 iters
-([run_scgs_residual.bash](../run_scgs_residual.bash)):
+vs [pulling_graph_scgs_hybrid.py](../arguments/endonerf/pulling_graph_scgs_hybrid.py)), 3000 iters:
 
 | Method | PSNR↑ (pulling) | SSIM↑ | LPIPS↓ | Track RPE↓ (SuPer t3) |
 |---|---|---|---|---|
@@ -374,11 +373,9 @@ python eval_control.py  --model_path output/endonerf/super_match   --configs arg
 # 3. render + demo video
 python render.py --model_path output/endonerf/super_match --configs arguments/endonerf/pulling_graph_match_3k.py --iteration 3000 --skip_train --skip_test
 ```
-The multi-trial study is scripted in [run_gc_multitrial.bash](../run_gc_multitrial.bash) (trials 4/8/9); the
-**SC-GS baseline** in [run_gc_scgs.bash](../run_gc_scgs.bash); the **decontaminated re-eval** in
-[run_control_fair.bash](../run_control_fair.bash); rendering in
-[run_super_render.bash](../run_super_render.bash); the Fig. 4 dumps in
-[run_control_viz.bash](../run_control_viz.bash). SLURM jobs use `--account=def-ester` and an H100.
+The multi-trial study covers trials 4/8/9, alongside the **SC-GS baseline**, the
+**decontaminated re-eval**, per-trial rendering, and the Fig. 4 dumps. SLURM jobs run on
+a single H100.
 
 > **Note on decontamination.** `control_results.json` holds the **decontaminated** (control-only) numbers;
 > the uncorrected residual-active numbers are preserved as `control_results_residual.json` per model. The guard
